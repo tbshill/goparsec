@@ -53,7 +53,7 @@ func ExpectString(s string) TextParser {
 
 		slen := len(s)
 
-		if slen < len(in) {
+		if slen > len(in) {
 			return "", in, expectStringError(s, in)
 		}
 		if s != in[:slen] {

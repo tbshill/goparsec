@@ -48,3 +48,61 @@ func BenchmarkExpectByte(b *testing.B) {
 		_, _, _ = tok, rem, err
 	}
 }
+
+func TestExpectRune(t *testing.T) {
+	tok, rem, err := ExpectByte('a')("abc")
+	if err != nil {
+		t.Errorf("ExpectRune returned an error on a valid input")
+	}
+	if tok != "a" {
+		t.Errorf("ExpectRune returned the wrong token")
+	}
+	if rem != "bc" {
+		t.Errorf("ExpectRune returned the wrong remaining string")
+	}
+}
+
+func BenchmarkExpectRune(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+	tok, rem, err := ExpectByte('a')("abc")
+		_, _, _ = tok, rem, err
+	}
+}
+
+func TestExpectString(t *testing.T) {
+	tok, rem, err := ExpectString("Hello")("Hello World")
+	if err != nil {
+		t.Errorf("ExpectString returned an error on a valid input: %v", err)
+	}
+	if tok != "Hello" {
+		t.Errorf("ExpectString returned the wrong token: %s", tok)
+	}
+	if rem != " World" {
+		t.Errorf("ExpectString returned the wrong remaining string: %s", rem)
+	}
+}
+
+func BenchmarkExpectString(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		tok, rem, err := ExpectString("Hello")("Hello World")
+		_, _, _ = tok, rem, err
+	}
+}
+
+func TestExpectRuneFrom(t *testing.T) {
+	ex := "abc"
+	abc := ExpectRuneFrom(ex)
+
+	for _, r := range ex {
+		tok, rem, err := abc(string(r)+"Hello")
+		if err != nil {
+			t.Errorf("ExpectString returned an error on a valid input: %v", err)
+		}
+		if tok != string(r) {
+			t.Errorf("ExpectString returned the wrong token: %s", tok)
+		}
+		if rem != "Hello" {
+			t.Errorf("ExpectString returned the wrong remaining string: %s", rem)
+		}
+	}
+}
