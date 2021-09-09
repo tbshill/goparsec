@@ -1,3 +1,3 @@
-module github.com/tbshill/parsec
+module github.com/tbshill/goparsec
 
 go 1.13
