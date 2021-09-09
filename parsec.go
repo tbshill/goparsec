@@ -1,8 +1,8 @@
 package goparsec
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"unicode/utf8"
 )
 
@@ -34,7 +34,7 @@ func expectByteError(expect, got byte) error {
 	return fmt.Errorf("Expected '%b', Got '%b'", expect, got)
 }
 
-func ExpectRune(r rune)  TextParser {
+func ExpectRune(r rune) TextParser {
 	return checkInputSize(func(in string) (string, string, error) {
 		got, s := utf8.DecodeRuneInString(in)
 		if r != got {
@@ -90,3 +90,49 @@ var ExpectAnyRune = checkInputSize(func(in string) (string, string, error) {
 	_, size := utf8.DecodeRuneInString(in)
 	return in[:size], in[size:], nil
 })
+
+func And(parsers ...TextParser) TextParser {
+	return func(in string) (string, string, error) {
+		tok, rem := "", in
+		for _, parser := range parsers {
+			if tmpTok, tmpRem, err := parser(rem); err != nil {
+				return "", in, err
+			} else {
+				tok += tmpTok
+				rem = tmpRem
+			}
+		}
+		return tok, rem, nil
+	}
+}
+
+func Or(parsers ...TextParser) TextParser {
+	return func(in string) (string, string, error) {
+		for _, parser := range parsers {
+			if tok, rem, err := parser(in); err == nil {
+				return tok, rem, err
+			}
+		}
+		return "", in, fmt.Errorf("No match")
+	}
+}
+
+func ExpectEOI(in string) (string, string, error) {
+	if in != "" {
+		return "", in, expectEOIError()
+	}
+	return "", "", nil
+}
+
+func expectEOIError() error {
+	return fmt.Errorf("Expected the end of input")
+}
+
+var (
+	ExpectDigit      = ExpectRuneFrom("1234567890")
+	ExpectLetter     = ExpectRuneFrom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	ExpectWhiteSpace = ExpectRuneFrom(" \t\r\n")
+	ExpectUnixNewLine = ExpectRune('\n')
+	ExpectWindowsNewLine = ExpectString("\r\n")
+	ExpectNewLine = Or(ExpectWindowsNewLine, ExpectUnixNewLine)
+)

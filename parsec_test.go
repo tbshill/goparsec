@@ -16,14 +16,14 @@ func TestCheckInputSize(t *testing.T) {
 }
 
 func BenchmarkCheckInputSize_NoErr(b *testing.B) {
-    for n := 0; n < b.N; n++ {
+	for n := 0; n < b.N; n++ {
 		_, _, err := checkInputSize(ExpectAnyRune)("ABC")
 		_ = err
 	}
 }
 
 func BenchmarkCheckInputSize_Err(b *testing.B) {
-    for n := 0; n < b.N; n++ {
+	for n := 0; n < b.N; n++ {
 		_, _, err := checkInputSize(ExpectAnyRune)("")
 		_ = err
 	}
@@ -43,7 +43,7 @@ func TestExpectByte(t *testing.T) {
 }
 
 func BenchmarkExpectByte(b *testing.B) {
-    for n := 0; n < b.N; n++ {
+	for n := 0; n < b.N; n++ {
 		tok, rem, err := ExpectByte(byte(97))("abc")
 		_, _, _ = tok, rem, err
 	}
