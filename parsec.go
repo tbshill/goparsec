@@ -117,6 +117,31 @@ func Or(parsers ...TextParser) TextParser {
 	}
 }
 
+func Optional(parser TextParser) TextParser {
+	return func (in string) (string, string, error) {
+		tok, rem, _ := parser(in)
+		return tok, rem, nil
+	}
+}
+
+func Repeat(parser TextParser) TextParser {
+	return func (in string) (string, string, error) {
+		tok, rem, err := parser(in)
+		if err != nil {
+			return "", in, err
+		}
+
+		for {
+			t, r, err := parser(rem)
+			if err != nil {
+				return tok, rem, nil
+			}
+			tok += t
+			rem = r
+		}
+	}
+}
+
 func ExpectEOI(in string) (string, string, error) {
 	if in != "" {
 		return "", in, expectEOIError()

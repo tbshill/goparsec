@@ -106,3 +106,60 @@ func TestExpectRuneFrom(t *testing.T) {
 		}
 	}
 }
+
+func TestRepeat(t *testing.T) {
+	in := "aaabbb"
+	as := Repeat(ExpectRune('a'))
+	bs := Repeat(ExpectRune('b'))
+
+	tok, rem, err := as(in)
+	if err != nil {
+		t.Errorf("Repeat returned an error when it had valid input")
+	}
+	if tok != "aaa" {
+		t.Errorf("Repeat did not return the correct token")
+	}
+	if rem != "bbb" {
+		t.Errorf("Repeat did not return the correct remaining string")
+	}
+
+
+	tok, rem, err = bs(rem)
+	if err != nil {
+		t.Errorf("Repeat returned an error when it had valid input")
+	}
+	if tok != "bbb" {
+		t.Errorf("Repeat did not return the correct token")
+	}
+	if rem != "" {
+		t.Errorf("Repeat did not return the correct remaining string")
+	}
+}
+
+func TestOptional(t *testing.T) {
+	in := "a,b"
+	p := And(ExpectRune('a'), Optional(ExpectRune(',')), ExpectRune('b'))
+	tok, rem, err := p(in)
+
+	if err != nil {
+		t.Errorf("Optional returned an error when it had valid input")
+	}
+	if tok != "a,b" {
+		t.Errorf("Optional did not return the correct token")
+	}
+	if rem != "" {
+		t.Errorf("Optional did not return the correct remaining string")
+	}
+
+	tok, rem, err = p("ab")
+
+	if err != nil {
+		t.Errorf("Optional returned an error when it had valid input")
+	}
+	if tok != "ab" {
+		t.Errorf("Optional did not return the correct token")
+	}
+	if rem != "" {
+		t.Errorf("Optional did not return the correct remaining string")
+	}
+}
