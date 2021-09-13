@@ -82,6 +82,19 @@ func TestExpectString(t *testing.T) {
 	}
 }
 
+func TestExpectCaseInsensitiveString(t *testing.T) {
+	tok, rem, err := ExpectCaseInsensitiveString("HELLO")("Hello World")
+	if err != nil {
+		t.Errorf("ExpectString returned an error on a valid input: %v", err)
+	}
+	if tok != "Hello" {
+		t.Errorf("ExpectString returned the wrong token: %s", tok)
+	}
+	if rem != " World" {
+		t.Errorf("ExpectString returned the wrong remaining string: %s", rem)
+	}
+}
+
 func BenchmarkExpectString(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		tok, rem, err := ExpectString("Hello")("Hello World")

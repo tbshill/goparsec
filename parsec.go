@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"unicode/utf8"
+	"strings"
 )
 
 var (
@@ -57,6 +58,20 @@ func ExpectString(s string) TextParser {
 			return "", in, expectStringError(s, in)
 		}
 		if s != in[:slen] {
+			return "", in, expectStringError(s, in[:slen])
+		}
+		return in[:slen], in[slen:], nil
+	})
+}
+
+func ExpectCaseInsensitiveString(s string) TextParser {
+	return checkInputSize(func(in string) (string, string, error) {
+		slen := len(s)
+
+		if slen > len(in) {
+			return "", in, expectStringError(s, in)
+		}
+		if strings.ToUpper(s) != strings.ToUpper(in[:slen]) {
 			return "", in, expectStringError(s, in[:slen])
 		}
 		return in[:slen], in[slen:], nil
