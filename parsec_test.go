@@ -176,3 +176,19 @@ func TestOptional(t *testing.T) {
 		t.Errorf("Optional did not return the correct remaining string")
 	}
 }
+
+func TestExpectUntil(t *testing.T) {
+	in  := "aaabaaabbaaa"
+	p := ExpectUntil(ExpectString("bb"))
+
+	tok, rem, err := p(in)
+	if err != nil {
+		t.Errorf("ExpectUntil returned an error when it had valid input")
+	}
+	if tok != "aaabaaa" {
+		t.Errorf("ExpectUntil did not return the correct token: %s", tok)
+	}
+	if rem != "bbaaa" {
+		t.Errorf("ExpectUntil did not return the correct remaining string: %s", rem)
+	}
+}

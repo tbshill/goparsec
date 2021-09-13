@@ -164,6 +164,24 @@ func ExpectEOI(in string) (string, string, error) {
 	return "", "", nil
 }
 
+func ExpectUntil(parser TextParser) TextParser {
+	return func(in string) (string, string, error) {
+		var tmpTok, tok, rem string
+		var err error
+
+		rem = in
+		for {
+			_, _, err = parser(rem)
+			if err != nil {
+				tmpTok, rem, _ = ExpectAnyRune(rem)
+				tok += tmpTok
+			} else {
+				return tok, rem, nil
+			}
+		}
+	}
+}
+
 func expectEOIError() error {
 	return fmt.Errorf("Expected the end of input")
 }
