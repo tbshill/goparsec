@@ -231,3 +231,32 @@ func TestExpectEOI(t *testing.T) {
 		})
 	}
 }
+
+func TestExpectDigit(t *testing.T) {
+	for i := 0; i < 128; i++ {
+		switch rune(i) {
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			tok, rem, err := ExpectDigit(string(rune(i)))
+			if tok != string(rune(i)) {
+				t.Errorf("ExpectDigit got %s, want %c", tok, rune(i))
+			}
+			if rem != "" {
+				t.Errorf("ExpectDigit Did not consume all of the input")
+			}
+			if err != nil {
+				t.Errorf("ExpectDigit returned an error on valid input: %v", err)
+			}
+		default:
+			tok, rem, err := ExpectDigit(string(rune(i)))
+			if tok != "" {
+				t.Errorf("ExpectDigit got %s, want empty string", tok)
+			}
+			if rem != string(rune(i)) {
+				t.Errorf("ExpectDigit should not have consumed the input")
+			}
+			if err == nil {
+				t.Errorf("ExpectDigit should have returned an error")
+			}
+		}
+	}
+}
