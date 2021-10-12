@@ -196,22 +196,22 @@ func TestExpectEOI(t *testing.T) {
 	tests := []struct {
 		name    string
 		in      string
-		want    string
-		want1   string
+		tok     string
+		rem     string
 		wantErr bool
 	}{
 		{
 			name:    "No input",
 			in:      "",
-			want:    "",
-			want1:   "",
+			tok:     "",
+			rem:     "",
 			wantErr: false,
 		},
 		{
 			name:    "input",
 			in:      "input",
-			want:    "",
-			want1:   "",
+			tok:     "",
+			rem:     "input",
 			wantErr: true,
 		},
 	}
@@ -222,11 +222,11 @@ func TestExpectEOI(t *testing.T) {
 				t.Errorf("ExpectEOI() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("ExpectEOI() got = %v, want %v", got, tt.want)
+			if got != tt.tok {
+				t.Errorf("ExpectEOI() got = %v, tok %v", got, tt.tok)
 			}
-			if got1 != tt.want1 {
-				t.Errorf("ExpectEOI() got1 = %v, want %v", got1, tt.want1)
+			if got1 != tt.rem {
+				t.Errorf("ExpectEOI() got1 = %v, tok %v", got1, tt.rem)
 			}
 		})
 	}
@@ -238,7 +238,7 @@ func TestExpectDigit(t *testing.T) {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			tok, rem, err := ExpectDigit(string(rune(i)))
 			if tok != string(rune(i)) {
-				t.Errorf("ExpectDigit got %s, want %c", tok, rune(i))
+				t.Errorf("ExpectDigit got %s, tok %c", tok, rune(i))
 			}
 			if rem != "" {
 				t.Errorf("ExpectDigit Did not consume all of the input")
@@ -249,7 +249,7 @@ func TestExpectDigit(t *testing.T) {
 		default:
 			tok, rem, err := ExpectDigit(string(rune(i)))
 			if tok != "" {
-				t.Errorf("ExpectDigit got %s, want empty string", tok)
+				t.Errorf("ExpectDigit got %s, tok empty string", tok)
 			}
 			if rem != string(rune(i)) {
 				t.Errorf("ExpectDigit should not have consumed the input")
