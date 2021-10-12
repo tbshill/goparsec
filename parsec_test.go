@@ -64,7 +64,7 @@ func TestExpectRune(t *testing.T) {
 
 func BenchmarkExpectRune(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-	tok, rem, err := ExpectByte('a')("abc")
+		tok, rem, err := ExpectByte('a')("abc")
 		_, _, _ = tok, rem, err
 	}
 }
@@ -107,7 +107,7 @@ func TestExpectRuneFrom(t *testing.T) {
 	abc := ExpectRuneFrom(ex)
 
 	for _, r := range ex {
-		tok, rem, err := abc(string(r)+"Hello")
+		tok, rem, err := abc(string(r) + "Hello")
 		if err != nil {
 			t.Errorf("ExpectString returned an error on a valid input: %v", err)
 		}
@@ -135,7 +135,6 @@ func TestRepeat(t *testing.T) {
 	if rem != "bbb" {
 		t.Errorf("Repeat did not return the correct remaining string")
 	}
-
 
 	tok, rem, err = bs(rem)
 	if err != nil {
@@ -178,7 +177,7 @@ func TestOptional(t *testing.T) {
 }
 
 func TestExpectUntil(t *testing.T) {
-	in  := "aaabaaabbaaa"
+	in := "aaabaaabbaaa"
 	p := ExpectUntil(ExpectString("bb"))
 
 	tok, rem, err := p(in)
@@ -190,5 +189,45 @@ func TestExpectUntil(t *testing.T) {
 	}
 	if rem != "bbaaa" {
 		t.Errorf("ExpectUntil did not return the correct remaining string: %s", rem)
+	}
+}
+
+func TestExpectEOI(t *testing.T) {
+	tests := []struct {
+		name    string
+		in      string
+		want    string
+		want1   string
+		wantErr bool
+	}{
+		{
+			name:    "No input",
+			in:      "",
+			want:    "",
+			want1:   "",
+			wantErr: false,
+		},
+		{
+			name:    "input",
+			in:      "input",
+			want:    "",
+			want1:   "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1, err := ExpectEOI(tt.in)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ExpectEOI() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ExpectEOI() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("ExpectEOI() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
 	}
 }
