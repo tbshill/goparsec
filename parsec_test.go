@@ -287,3 +287,19 @@ func TestDrop(t *testing.T) {
 		t.Errorf("Returned an error on valid input: %v", err)
 	}
 }
+
+func TestExpectThrough(t *testing.T) {
+	parser := ExpectThrough(ExpectString("ss"))
+
+	tok, rem, err := parser("aabbccddeessgghhkkii")
+	if tok != "aabbccddeess" {
+		t.Errorf("Expect Through did not parse correctly to %s", tok)
+	}
+	if rem != "gghhkkii" {
+		t.Errorf("Failed to consume all tokens: %s", rem)
+	}
+	if err != nil {
+		t.Errorf("Returned an error on valid input: %v", err)
+	}
+
+}

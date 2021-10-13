@@ -180,6 +180,8 @@ func ExpectUntil(parser TextParser) TextParser {
 		for {
 			_, _, err = parser(rem)
 			if err != nil {
+				// ExpectAnyRun forces consumption of a character so that the
+				// parser can be applied on the next character
 				tmpTok, rem, err1 = ExpectAnyRune(rem)
 				if err1 == ErrNoInput {
 					return "", in, ErrNoInput
@@ -187,6 +189,32 @@ func ExpectUntil(parser TextParser) TextParser {
 				tok += tmpTok
 			} else {
 				return tok, rem, nil
+			}
+		}
+	}
+}
+
+func ExpectThrough(parser TextParser) TextParser {
+	return func(in string) (string, string, error) {
+		var (
+			tmpTok, tok, rem string
+			err, err1        error
+		)
+		rem = in
+		for {
+			tmpTok, rem, err = parser(rem)
+			if err != nil {
+				// ExpectAnyRun forces consumption of a character so that the
+				// parser can be applied on the next character
+				tmpTok, rem, err1 = ExpectAnyRune(rem)
+				if err1 == ErrNoInput {
+					return "", in, ErrNoInput
+				}
+				tok += tmpTok
+
+			} else {
+				tok += tmpTok
+				return tok, rem, err
 			}
 		}
 	}
