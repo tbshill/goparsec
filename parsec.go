@@ -13,6 +13,7 @@ var (
 
 type TextParser func(string) (string, string, error)
 
+// Drop drops the token from a parser and replaces it with an empty string.
 func Drop(p TextParser) TextParser {
 	return func(in string) (tok string, rem string, err error) {
 		_, rem, err = p(in)
@@ -29,6 +30,7 @@ func checkInputSize(p TextParser) TextParser {
 	}
 }
 
+// ExpectByte expects a specific byte to be the next character in the sequence
 func ExpectByte(b byte) TextParser {
 	return checkInputSize(func(in string) (string, string, error) {
 		if in[0] != b {
@@ -42,6 +44,8 @@ func expectByteError(expect, got byte) error {
 	return fmt.Errorf("Expected '%b', Got '%b'", expect, got)
 }
 
+// ExpectRune expects a rune to be the next character in the sequence
+// This allows unicode support
 func ExpectRune(r rune) TextParser {
 	return checkInputSize(func(in string) (string, string, error) {
 		got, s := utf8.DecodeRuneInString(in)
@@ -56,6 +60,8 @@ func expectRuneError(expect, got rune) error {
 	return fmt.Errorf("Expected '%c', Got '%c'", expect, got)
 }
 
+// ExpectString expects a predefined string to be the next sequence of
+// characters in the input
 func ExpectString(s string) TextParser {
 	return checkInputSize(func(in string) (string, string, error) {
 
@@ -71,6 +77,8 @@ func ExpectString(s string) TextParser {
 	})
 }
 
+// ExpectCaseInsensitiveString expects a predefined string to be the next
+// sequence of characters in teh input (ignoring case)
 func ExpectCaseInsensitiveString(s string) TextParser {
 	return checkInputSize(func(in string) (string, string, error) {
 		slen := len(s)
@@ -89,6 +97,7 @@ func expectStringError(expect, got string) error {
 	return fmt.Errorf("Expect '%s', Got '%s'", expect, got)
 }
 
+// ExpectRuneFrom expects any rune in the string to be the next character in the sequence
 func ExpectRuneFrom(s string) TextParser {
 	m := make(map[rune]struct{})
 	for _, r := range s {
@@ -108,11 +117,15 @@ func expectRuneFromError(expect string, got rune) error {
 	return fmt.Errorf("Expected rune from string '%s'. Got '%c'", expect, got)
 }
 
+// ExpectAnyRune will take off the next rune from the front of the input
 var ExpectAnyRune = checkInputSize(func(in string) (string, string, error) {
 	_, size := utf8.DecodeRuneInString(in)
 	return in[:size], in[size:], nil
 })
 
+// And joins a sequence of parsers together such that all parsers must
+// succeed in sequence. The token represents the cumulated output from all
+// of the parsers.
 func And(parsers ...TextParser) TextParser {
 	return func(in string) (string, string, error) {
 		tok, rem := "", in
@@ -128,6 +141,9 @@ func And(parsers ...TextParser) TextParser {
 	}
 }
 
+// Or joins a sequence of parsers together such that only one of the parsers
+// must succeed. The parsers are processed in order. The token
+// is the token from the first parser to return without an error
 func Or(parsers ...TextParser) TextParser {
 	return func(in string) (string, string, error) {
 		for _, parser := range parsers {
@@ -139,6 +155,8 @@ func Or(parsers ...TextParser) TextParser {
 	}
 }
 
+// Optional will attempt to parse with a given parser. If it fails
+// no error is thrown and the remaining represents the original input
 func Optional(parser TextParser) TextParser {
 	return func(in string) (string, string, error) {
 		tok, rem, _ := parser(in)
@@ -146,6 +164,8 @@ func Optional(parser TextParser) TextParser {
 	}
 }
 
+// Repeat will repeat a parser until it fails. The token is the
+// cumulative token from all successive parses.
 func Repeat(parser TextParser) TextParser {
 	return func(in string) (string, string, error) {
 		tok, rem, err := parser(in)
@@ -164,6 +184,7 @@ func Repeat(parser TextParser) TextParser {
 	}
 }
 
+// ExpectEOI Expects the End Of Input
 func ExpectEOI(in string) (string, string, error) {
 	if in != "" {
 		return "", in, expectEOIError()
@@ -171,6 +192,8 @@ func ExpectEOI(in string) (string, string, error) {
 	return "", "", nil
 }
 
+// ExpectUntil will consume any rune until it the parser sucessfully parses the input
+// The token will be all text upto (but not including) token from the parser
 func ExpectUntil(parser TextParser) TextParser {
 	return func(in string) (string, string, error) {
 		var tmpTok, tok, rem string
@@ -194,6 +217,8 @@ func ExpectUntil(parser TextParser) TextParser {
 	}
 }
 
+// ExpectThrough will consume any rune until the parser successfully parses the input
+// The token is all of the upto and including the token parsed by the parser.
 func ExpectThrough(parser TextParser) TextParser {
 	return func(in string) (string, string, error) {
 		var (
@@ -204,7 +229,7 @@ func ExpectThrough(parser TextParser) TextParser {
 		for {
 			tmpTok, rem, err = parser(rem)
 			if err != nil {
-				// ExpectAnyRun forces consumption of a character so that the
+				// ExpectAnyRune forces consumption of a character so that the
 				// parser can be applied on the next character
 				tmpTok, rem, err1 = ExpectAnyRune(rem)
 				if err1 == ErrNoInput {
@@ -225,10 +250,21 @@ func expectEOIError() error {
 }
 
 var (
-	ExpectDigit          = ExpectRuneFrom("1234567890")
-	ExpectLetter         = ExpectRuneFrom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	ExpectWhiteSpace     = ExpectRuneFrom(" \t\r\n")
-	ExpectUnixNewLine    = ExpectRune('\n')
+	// ExpectDigit expects a digit 0-9
+	ExpectDigit = ExpectRuneFrom("1234567890")
+
+	// ExpectLetter expects a character from a-zA-Z
+	ExpectLetter = ExpectRuneFrom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	// ExpectWhiteSpace expects a space, tab, carriage return, or newline
+	ExpectWhiteSpace = ExpectRuneFrom(" \t\r\n")
+
+	// ExpectUnixNewLine expects an \n
+	ExpectUnixNewLine = ExpectRune('\n')
+
+	// ExpectWindowsNewLine expects a \r\n
 	ExpectWindowsNewLine = ExpectString("\r\n")
-	ExpectNewLine        = Or(ExpectUnixNewLine, ExpectWindowsNewLine)
+
+	// ExpectNewLine first checks for Unix, and then Windows newlines
+	ExpectNewLine = Or(ExpectUnixNewLine, ExpectWindowsNewLine)
 )
