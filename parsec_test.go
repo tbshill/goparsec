@@ -260,3 +260,17 @@ func TestExpectDigit(t *testing.T) {
 		}
 	}
 }
+
+func TestDrop(t *testing.T) {
+	parser := And(Drop(ExpectRune('a')), ExpectAnyRune, Drop(ExpectRune('a')))
+	tok, rem, err := parser("aba")
+	if tok != "b" {
+		t.Errorf("Drop failed to %s", tok)
+	}
+	if rem != "" {
+		t.Errorf("Failed to consume all tokens: %s", rem)
+	}
+	if err != nil {
+		t.Errorf("Returned an error on valid input: %v", err)
+	}
+}

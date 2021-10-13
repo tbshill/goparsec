@@ -3,8 +3,8 @@ package goparsec
 import (
 	"errors"
 	"fmt"
-	"unicode/utf8"
 	"strings"
+	"unicode/utf8"
 )
 
 var (
@@ -12,6 +12,13 @@ var (
 )
 
 type TextParser func(string) (string, string, error)
+
+func Drop(p TextParser) TextParser {
+	return func(in string) (tok string, rem string, err error) {
+		_, rem, err = p(in)
+		return
+	}
+}
 
 func checkInputSize(p TextParser) TextParser {
 	return func(in string) (string, string, error) {
@@ -133,14 +140,14 @@ func Or(parsers ...TextParser) TextParser {
 }
 
 func Optional(parser TextParser) TextParser {
-	return func (in string) (string, string, error) {
+	return func(in string) (string, string, error) {
 		tok, rem, _ := parser(in)
 		return tok, rem, nil
 	}
 }
 
 func Repeat(parser TextParser) TextParser {
-	return func (in string) (string, string, error) {
+	return func(in string) (string, string, error) {
 		tok, rem, err := parser(in)
 		if err != nil {
 			return "", in, err
@@ -187,10 +194,10 @@ func expectEOIError() error {
 }
 
 var (
-	ExpectDigit      = ExpectRuneFrom("1234567890")
-	ExpectLetter     = ExpectRuneFrom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	ExpectWhiteSpace = ExpectRuneFrom(" \t\r\n")
-	ExpectUnixNewLine = ExpectRune('\n')
+	ExpectDigit          = ExpectRuneFrom("1234567890")
+	ExpectLetter         = ExpectRuneFrom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	ExpectWhiteSpace     = ExpectRuneFrom(" \t\r\n")
+	ExpectUnixNewLine    = ExpectRune('\n')
 	ExpectWindowsNewLine = ExpectString("\r\n")
-	ExpectNewLine = Or(ExpectWindowsNewLine, ExpectUnixNewLine)
+	ExpectNewLine        = Or(ExpectWindowsNewLine, ExpectUnixNewLine)
 )
