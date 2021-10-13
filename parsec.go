@@ -199,5 +199,5 @@ var (
 	ExpectWhiteSpace     = ExpectRuneFrom(" \t\r\n")
 	ExpectUnixNewLine    = ExpectRune('\n')
 	ExpectWindowsNewLine = ExpectString("\r\n")
-	ExpectNewLine        = Or(ExpectWindowsNewLine, ExpectUnixNewLine)
+	ExpectNewLine        = Or(ExpectUnixNewLine, ExpectWindowsNewLine)
 )
