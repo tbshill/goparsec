@@ -190,6 +190,19 @@ func TestExpectUntil(t *testing.T) {
 	if rem != "bbaaa" {
 		t.Errorf("ExpectUntil did not return the correct remaining string: %s", rem)
 	}
+
+	in = "aaabaaa"
+	tok, rem, err = p(in)
+	if err != ErrNoInput {
+		t.Errorf("ExpectUntil failed to return a ErrNoInput error")
+	}
+	if tok != "" {
+		t.Errorf("ExpectUntil did not return the correct token: %s", tok)
+	}
+	if rem != "aaabaaa" {
+		t.Errorf("ExpectUntil did not return the correct remaining string: %s", rem)
+	}
+
 }
 
 func TestExpectEOI(t *testing.T) {

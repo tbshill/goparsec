@@ -174,13 +174,16 @@ func ExpectEOI(in string) (string, string, error) {
 func ExpectUntil(parser TextParser) TextParser {
 	return func(in string) (string, string, error) {
 		var tmpTok, tok, rem string
-		var err error
+		var err, err1 error
 
 		rem = in
 		for {
 			_, _, err = parser(rem)
 			if err != nil {
-				tmpTok, rem, _ = ExpectAnyRune(rem)
+				tmpTok, rem, err1 = ExpectAnyRune(rem)
+				if err1 == ErrNoInput {
+					return "", in, ErrNoInput
+				}
 				tok += tmpTok
 			} else {
 				return tok, rem, nil
