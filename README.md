@@ -1,6 +1,6 @@
 # goparsec
 
-This is a simple combinatoric parsing library written in Go.
+This is a simple combinatoric parsing library written in Go. If you have never heard of combinatoric parsing, checkout my blog post: https://medium.com/braden-shill-cs-review/combinatoric-parsing-with-golang-1f5b4af10324
 
 ```go
 package main
